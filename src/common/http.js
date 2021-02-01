@@ -1,1 +1,1 @@
-export const url = "https://jsonplaceholder.typicode.com/";
+export const url = "https://api.github.com/repos/facebook/react/";

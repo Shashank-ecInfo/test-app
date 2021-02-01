@@ -6,9 +6,13 @@ import {
   Spinner,
   Input,
   InputGroup,
+  Badge,
+  Tooltip,
 } from "@chakra-ui/react";
 import { connect } from "react-redux";
 import { getPosts } from "../actions/posts";
+import moment from "moment";
+import { ChatIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 
 class Home extends React.Component {
   state = {
@@ -20,14 +24,14 @@ class Home extends React.Component {
     this.props.getPosts();
   }
 
-  routeChange = (pid) => {
+  routeChange = (pid, commentUrl) => {
     this.props.history.push({
       pathname: "/post",
-      state: { id: pid },
+      state: { id: pid, commentUrl: commentUrl },
     });
   };
 
-  showPosts = (posts) => {
+  showIssues = (posts) => {
     const bgColor = [
       "linear(to-r, green.200, pink.500)",
       "linear(to-l, #7928CA, #FF0080)",
@@ -48,26 +52,74 @@ class Home extends React.Component {
       })
       .slice(0, 20)
       .map((p, index) => {
+        console.log(p);
         return (
           <Box
             bgGradient={bgColor[Math.floor(Math.random() * bgColor.length)]}
             key={`${index}${p.id}`}
-            alignItems="center"
-            display="flex"
             pl="20px"
             py="10px"
-            onClick={() => this.routeChange(p.id)}
+            onClick={() => this.routeChange(p.id, p.comments_url)}
             cursor="pointer"
-            _hover={{ opacity: 0.5 }}
+            _hover={{ opacity: 0.7 }}
+            className="issuesBox"
           >
-            <span
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <span
+                style={{
+                  color: "#696969"
+                }}
+                className="issueTitles"
+              >
+                <InfoOutlineIcon color="darkgreen" marginRight="10px" />
+                {p.title}
+              </span>
+              {p.labels.map((l, index) => (
+                <Tooltip
+                  key={`${l.node_id}${index}`}
+                  label={l.description}
+                  aria-label="A tooltip"
+                  backgroundColor="#ffffff"
+                  color="#000000"
+                >
+                  <Badge
+                    variant="outline"
+                    style={{
+                      backgroundColor: `#${l.color}`,
+                      color: "#000000",
+                      marginLeft: "20px",
+                    }}
+                  >
+                    {l.name}
+                  </Badge>
+                </Tooltip>
+              ))}
+            </div>
+            <div
               style={{
-                color: "#696969",
-                textTransform: "capitalize",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingRight: 20,
               }}
             >
-              {p.title}
-            </span>
+              <div>
+                <span style={{ color: "#959da5" }}>{`#${p.number}`}</span>
+                <span style={{ color: "#959da5", marginLeft: 10 }}>{`${moment(
+                  p.created_at
+                )
+                  .startOf("day")
+                  .fromNow()} by ${p.user.login.replace("-", " ")}`}</span>
+              </div>
+              <span>
+                {p.comments === 0 ? null : (
+                  <span>
+                    <ChatIcon marginRight="10px" />
+                    {p.comments}
+                  </span>
+                )}
+              </span>
+            </div>
           </Box>
         );
       });
@@ -112,7 +164,7 @@ class Home extends React.Component {
               width: "70%",
             }}
           >
-            Posts
+            Issues
           </h1>
           <InputGroup size="md" style={{ width: "30%" }}>
             <Input
@@ -128,7 +180,7 @@ class Home extends React.Component {
         </header>
         <main>
           <VStack spacing={2} align="stretch" justifyContent="center">
-            {this.showPosts(posts)}
+            {this.showIssues(posts)}
           </VStack>
         </main>
       </Container>

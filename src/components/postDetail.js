@@ -1,7 +1,14 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Box, Button, Container, InputGroup, Textarea } from "@chakra-ui/react";
-import { getComments } from "../actions/posts";
+import {
+  Badge,
+  Box,
+  Button,
+  Container,
+  InputGroup,
+  Textarea,
+} from "@chakra-ui/react";
+import { addComment, getComments } from "../actions/posts";
 
 class PostDetail extends Component {
   state = {
@@ -9,18 +16,27 @@ class PostDetail extends Component {
   };
 
   componentDidMount() {
-    this.props.getComments(this.props.location.state.id);
+    this.props.getComments(this.props.location.state.commentUrl);
   }
 
   showComments = (comments, post) => {
+    console.log(comments);
     return (
-      <div style={{ padding: "0 5rem", margin: "5rem 0" }}>
-        <h1 style={{ marginBottom: "2rem", fontSize: "1.3rem" }}>
-          {comments.length} Comments on{" "}
+      <div style={{ padding: "0 5rem", margin: "2rem 0" }}>
+        <h1 style={{ marginBottom: "1rem", fontSize: "1.3rem" }}>
+          {post.comments} Comments on{" "}
           <span style={{ color: "#9d9d9d" }}>“{post.title}”</span>
         </h1>
         {comments.map((c, index) => (
           <Box borderWidth="1px" key={`${index}${c.id}`} padding="1rem 1.3rem">
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img
+                src={c.user.avatar_url}
+                style={{ height: "40px", width: "40px", borderRadius: "50%" }}
+              />
+              <span style={{marginLeft: '10px'}}>{c.user.login}</span>
+              <Badge variant="outline" marginLeft="10px">{c.user.type}</Badge>
+            </div>
             <h2
               style={{
                 fontSize: "15px",
@@ -31,15 +47,16 @@ class PostDetail extends Component {
             >
               {c.name}
             </h2>
-            <span>{c.body}</span>
+            <div dangerouslySetInnerHTML={{ __html: c.body }} style={{marginTop: '15px', marginLeft: '45px'}} />
           </Box>
         ))}
       </div>
     );
   };
 
-  addComment = () => {
+  addComment = (commentUrl) => {
     if (this.state.comment !== "") {
+      this.props.addComment(commentUrl);
       // Call add Comment action here by passing comment as the body
       console.log(this.state.comment);
     }
@@ -78,29 +95,12 @@ class PostDetail extends Component {
               fontSize: "30px",
             }}
           >
-            Post
+            {post.title}
           </h1>
+          <span
+            style={{ marginLeft: "10px", color: "#cccccc", fontSize: "30px" }}
+          >{`#${post.number}`}</span>
         </header>
-        <div>
-          <Box
-            bg="rgb(253, 216, 142)"
-            w="100%"
-            p={4}
-            color="white"
-            paddingX="2rem"
-          >
-            <h1
-              style={{
-                color: "rgba(29, 43, 54, 0.9)",
-                fontSize: "48px",
-                textTransform: "capitalize",
-                fontWeight: "bold",
-              }}
-            >
-              {post.title}
-            </h1>
-          </Box>
-        </div>
         <Box
           bg="rgb(241, 243, 245)"
           w="100%"
@@ -121,7 +121,12 @@ class PostDetail extends Component {
           </span>
         </Box>
         {this.showComments(comments, post)}
-        <Box borderWidth="1px" padding="1rem 1.3rem" marginBottom="2rem" width="80%">
+        <Box
+          borderWidth="1px"
+          padding="1rem 1.3rem"
+          marginBottom="2rem"
+          width="80%"
+        >
           <InputGroup size="md">
             <Textarea
               pr="4.5rem"
@@ -133,7 +138,15 @@ class PostDetail extends Component {
               }
             />
           </InputGroup>
-          <Button colorScheme="blue" marginTop="20px" onClick={this.addComment}>Post</Button>
+          <Button
+            colorScheme="blue"
+            marginTop="20px"
+            onClick={() =>
+              this.addComment(this.props.location.state.commentUrl)
+            }
+          >
+            Post
+          </Button>
         </Box>
       </Container>
     );
@@ -144,4 +157,4 @@ const mapStateToProps = (state) => ({
   postProps: state.postState,
 });
 
-export default connect(mapStateToProps, { getComments })(PostDetail);
+export default connect(mapStateToProps, { getComments, addComment })(PostDetail);

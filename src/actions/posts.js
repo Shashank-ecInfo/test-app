@@ -15,7 +15,7 @@ import { url } from "../common/http";
 export const getPosts = () => async (dispatch) => {
   dispatch({ type: GET_POSTS_REQUEST });
   try {
-    const res = await axios.get(url + "posts");
+    const res = await axios.get(url + "issues");
     // console.log("action>>>>>", res);
     if (res && res.status === 200) {
       dispatch({
@@ -30,10 +30,10 @@ export const getPosts = () => async (dispatch) => {
   }
 };
 
-export const getComments = (id) => async (dispatch) => {
+export const getComments = (commentUrl) => async (dispatch) => {
   dispatch({ type: GET_COMMENTS_REQUEST });
   try {
-    const res = await axios.get(url + `posts/${id}/comments`);
+    const res = await axios.get(commentUrl);
     // console.log("action>>>>>", res);
     if (res && res.status === 200) {
       dispatch({
@@ -48,12 +48,13 @@ export const getComments = (id) => async (dispatch) => {
   }
 };
 
-export const addComment = (id, data) => async (dispatch) => {
+export const addComment = (commentUrl, data) => async (dispatch) => {
+  console.log(commentUrl);
   dispatch({ type: ADD_COMMENTS_REQUEST });
   try {
-    const res = await axios.get({
+    const res = await axios({
       method: 'POST',
-      url: url + `posts/${id}/comments`,
+      url: commentUrl,
       data: JSON.stringify(data)
     });
     // console.log("action>>>>>", res);
